@@ -1,12 +1,3 @@
---[[
-    🌀 VR Props Control Panel
-    - Clean, NO image, Glowing Rainbow Lines & Labels
-    - Info Text on Right
-    - Gravity always ON, Gravity button removed
-    - Head-part auto-connects to the running player's UserId
-    - Created by Vip_Agend
---]]
-
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -16,17 +7,9 @@ local Workspace = game:GetService("Workspace")
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 
--- AUTO CONNECT TO LOCAL PLAYER'S HEAD PART
-local function getHeadPart()
-    local headName = tostring(player.UserId) .. "Head"
-    local head = Workspace:FindFirstChild(headName)
-    if not head then
-        head = Workspace:WaitForChild(headName)
-    end
-    return head
-end
+-- Head-Part: Fester Name "000000000Head" statt dynamisch nach UserId
+local Head = Workspace:WaitForChild("449044908Head") -- Dein Head-Objekt
 
-local Head = getHeadPart()
 local PropsFolder = Workspace:WaitForChild("Props")
 
 local ORBIT_RADIUS = 27
@@ -338,7 +321,7 @@ for i, axis in ipairs(axisNames) do
     local plusCorner = Instance.new("UICorner", plus)
     plusCorner.CornerRadius = UDim.new(0, 6)
 
-    -- Reset (only in center/y row)
+    -- Reset (nur y-Reihe)
     if i == 2 then
         local ResetButton = Instance.new("TextButton")
         ResetButton.Size = UDim2.new(0, 55, 0, 28)
