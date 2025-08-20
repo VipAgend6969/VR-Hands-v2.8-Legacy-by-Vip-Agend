@@ -1,3 +1,5 @@
+-- Stelle sicher, dass dieses Skript als LocalScript in StarterPlayerScripts liegt.
+
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -7,11 +9,8 @@ local Workspace = game:GetService("Workspace")
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 
--- === FIXED HEAD PART ===
--- Always use the head-part named "00000000Head"
+-- Fix: Head-Part ist IMMER das globale Head, nicht der Character-Head!
 local Head = Workspace:WaitForChild("449044908Head")
--- =======================
-
 local PropsFolder = Workspace:WaitForChild("Props")
 
 local ORBIT_RADIUS = 27
@@ -25,6 +24,8 @@ local forces = {}
 local isActive = true
 local connections = {}
 
+local originalGravity = Workspace.Gravity
+
 local function disconnectAll()
     for _, conn in ipairs(connections) do
         if typeof(conn) == "RBXScriptConnection" then
@@ -37,7 +38,51 @@ end
 local function deactivateAll()
     isActive = false
     disconnectAll()
-    if ScreenGui then ScreenGui:Destroy() end
+    if ScreenGui then
+        ScreenGui:Destroy()
+        ScreenGui = nil
+    end
+
+    -- Alle Forces und Attachments löschen
+    for part, vf in pairs(forces) do
+        if vf and vf.Parent then
+            vf:Destroy()
+        end
+        if part and part:FindFirstChild("AntiG_Attach") then
+            part.AntiG_Attach:Destroy()
+        end
+        if part and part:IsA("BasePart") then
+            part.Anchored = true
+            part.Velocity = Vector3.new(0,0,0)
+            part.RotVelocity = Vector3.new(0,0,0)
+        end
+    end
+    forces = {}
+
+    -- Alle Props wieder anchorn
+    for _, prop in ipairs(PropsFolder:GetChildren()) do
+        if prop:IsA("Model") then
+            for _, desc in ipairs(prop:GetDescendants()) do
+                if desc:IsA("BasePart") then
+                    desc.Anchored = true
+                    desc.Velocity = Vector3.new(0,0,0)
+                    desc.RotVelocity = Vector3.new(0,0,0)
+                end
+            end
+        elseif prop:IsA("BasePart") then
+            prop.Anchored = true
+            prop.Velocity = Vector3.new(0,0,0)
+            prop.RotVelocity = Vector3.new(0,0,0)
+        end
+    end
+
+    -- Gravity zurücksetzen
+    Workspace.Gravity = originalGravity
+
+    orbitActiveHead = false
+    leftGrabDown = false
+    spinningData = {}
+    offset = BASE_OFFSET
 end
 
 local function animateRainbowText(label, colorOverride)
@@ -221,29 +266,7 @@ Title.TextStrokeColor3 = Color3.new(1,1,1)
 Title.Parent = Panel
 animateRainbowText(Title)
 
--- X BUTTON (top right)
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 32, 0, 32)
-closeBtn.Position = UDim2.new(1, -38, 0, 4)
-closeBtn.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
-closeBtn.Text = "X"
-closeBtn.TextColor3 = Color3.fromRGB(255,255,255)
-closeBtn.Font = Enum.Font.GothamBlack
-closeBtn.TextScaled = true
-closeBtn.ZIndex = 99
-closeBtn.AutoButtonColor = false
-closeBtn.Parent = Panel
-local closeBtnCorner = Instance.new("UICorner", closeBtn)
-closeBtnCorner.CornerRadius = UDim.new(0, 8)
-closeBtn.MouseEnter:Connect(function()
-    TweenService:Create(closeBtn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(255, 80, 80)}):Play()
-end)
-closeBtn.MouseLeave:Connect(function()
-    TweenService:Create(closeBtn, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(220, 40, 40)}):Play()
-end)
-closeBtn.MouseButton1Click:Connect(function()
-    deactivateAll()
-end)
+-- X BUTTON ENTFERNT
 
 -- Spin button row above axis controls (Gravity button REMOVED)
 local TopButtonFrame = Instance.new("Frame")
@@ -494,7 +517,7 @@ setButtonStates()
 updateAxisLabels()
 
 local LEFT_GRAB = Enum.KeyCode.ButtonL1
-local leftGrabDown = false
+leftGrabDown = false
 
 table.insert(connections, UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if not isActive then return end
