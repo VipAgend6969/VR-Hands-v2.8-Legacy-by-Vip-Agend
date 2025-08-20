@@ -7,8 +7,10 @@ local Workspace = game:GetService("Workspace")
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 
--- Head-Part: Fester Name "000000000Head" statt dynamisch nach UserId
-local Head = Workspace:WaitForChild("449044908Head") -- Dein Head-Objekt
+-- === FIXED HEAD PART ===
+-- Always use the head-part named "00000000Head"
+local Head = Workspace:WaitForChild("449044908Head")
+-- =======================
 
 local PropsFolder = Workspace:WaitForChild("Props")
 
@@ -38,7 +40,6 @@ local function deactivateAll()
     if ScreenGui then ScreenGui:Destroy() end
 end
 
--- Animated rainbow for TextLabel (one color for whole text, glows, not too fast)
 local function animateRainbowText(label, colorOverride)
     local t = 0
     task.spawn(function()
@@ -57,7 +58,6 @@ local function animateRainbowText(label, colorOverride)
     end)
 end
 
--- Explosion visual effect function (unchanged)
 local function createExplosionEffect(center, parent)
     if not isActive then return end
     for i = 1, 12 do
