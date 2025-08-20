@@ -1,5 +1,11 @@
--- VR Props Control Panel - Clean, NO image, Glowing Rainbow Lines & Labels, Info Text on Right
--- Gravity always ON, Gravity button removed
+--[[
+    🌀 VR Props Control Panel
+    - Clean, NO image, Glowing Rainbow Lines & Labels
+    - Info Text on Right
+    - Gravity always ON, Gravity button removed
+    - Head-part auto-connects to the running player's UserId
+    - Created by Vip_Agend
+--]]
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -9,7 +15,18 @@ local Workspace = game:GetService("Workspace")
 
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
-local Head = Workspace:WaitForChild(tostring(player.UserId) .. "Head")
+
+-- AUTO CONNECT TO LOCAL PLAYER'S HEAD PART
+local function getHeadPart()
+    local headName = tostring(player.UserId) .. "Head"
+    local head = Workspace:FindFirstChild(headName)
+    if not head then
+        head = Workspace:WaitForChild(headName)
+    end
+    return head
+end
+
+local Head = getHeadPart()
 local PropsFolder = Workspace:WaitForChild("Props")
 
 local ORBIT_RADIUS = 27
@@ -219,7 +236,6 @@ Title.Font = Enum.Font.GothamBlack
 Title.TextStrokeTransparency = 0.2
 Title.TextStrokeColor3 = Color3.new(1,1,1)
 Title.Parent = Panel
-
 animateRainbowText(Title)
 
 -- X BUTTON (top right)
